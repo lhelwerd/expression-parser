@@ -23,7 +23,7 @@ from __future__ import division
 import ast
 
 __all__ = ['Expression_Parser']
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 class Expression_Parser(ast.NodeVisitor):
     """
@@ -112,10 +112,14 @@ class Expression_Parser(ast.NodeVisitor):
         else:
             self._functions = functions
 
+        self._used_variables = set()
+
     def parse(self, expression, filename='<expression>'):
         """
         Parse a string `expression` and return its result.
         """
+
+        self._used_variables = set()
 
         try:
             return self.visit(ast.parse(expression))
@@ -133,6 +137,16 @@ class Expression_Parser(ast.NodeVisitor):
             error = SyntaxError('{}: {}'.format(error_type, error.args[0]),
                                 (filename,) + line_col + (expression,))
             raise error
+
+    @property
+    def used_variables(self):
+        """
+        Retrieve the names of the variables that were evaluated in the most
+        recent call to `parse`. If `parse` failed with an exception, then
+        this set may be incomplete.
+        """
+
+        return self._used_variables
 
     def generic_visit(self, node):
         """
@@ -280,6 +294,7 @@ class Expression_Parser(ast.NodeVisitor):
         """
 
         if node.id in self._variables:
+            self._used_variables.add(node.id)
             return self._variables[node.id]
 
         if node.id in self._variable_names:

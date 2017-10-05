@@ -318,3 +318,14 @@ class Expression_Parser_Test(unittest.TestCase):
 
         with self.assertRaisesError("Exactly one expression must be provided"):
             self.parser.parse('1;2')
+
+    def test_used_variables(self):
+        """
+        Test whether used variables are tracked.
+        """
+
+        self.assertEqual(self.parser.used_variables, set())
+        self.parser.parse('1')
+        self.assertEqual(self.parser.used_variables, set())
+        self.parser.parse('data')
+        self.assertEqual(self.parser.used_variables, set(['data']))

@@ -21,6 +21,9 @@ custom variable and function environment contexts.
 - Errors from parsing or evaluating the expression are reported as 
   `SyntaxError` with appropriate context parameters to make error display 
   easier (works with default traceback output)
+- A successful parse yields the result of the evaluated expression, and 
+  a separate property `used_variables` provides a set of variable names used in 
+  the evaluation.
 - Supports both Python 2.7 and 3.6 AST syntax; note that the division operator 
   `/` always returns floats instead of integers and that `True`, `False` and 
   `None` are reserved named contants and cannot be overridden through the 
