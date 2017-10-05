@@ -39,6 +39,26 @@ class Expression_Parser_Test(unittest.TestCase):
         self.parser = expression.Expression_Parser(variables=variables,
                                                    functions=functions)
 
+    def assertRaisesError(self, regex=None, exception=SyntaxError):
+        """
+        Check that an exception is raised from a context manager body.
+
+        If `regex` is `None`, then only the exception type is tested, otherwise
+        the this also tests if `regex` matches the exception message.
+        The `exception` type by default is `SyntaxError`.
+        """
+
+        # pylint: disable=invalid-name,no-member
+
+        if regex is None:
+            return self.assertRaises(exception)
+
+        if hasattr(self, 'assertRaisesRegex'):
+            return self.assertRaisesRegex(exception, regex)
+
+        # Python 2.7
+        return self.assertRaisesRegexp(exception, regex)
+
     def test_and(self):
         """
         Test the 'and' boolean operator.
@@ -246,13 +266,13 @@ class Expression_Parser_Test(unittest.TestCase):
         exceptions.
         """
 
-        with self.assertRaisesRegexp(NameError, 'Cannot override keyword True'):
+        with self.assertRaisesError('Cannot override keyword True',
+                                    exception=NameError):
             parser = expression.Expression_Parser(variables={'True': 42})
 
         parser = expression.Expression_Parser()
         self.assertIsNone(parser.parse('None'))
-        with self.assertRaisesRegexp(SyntaxError,
-                                     "NameError: Name 'test' is not defined"):
+        with self.assertRaisesError("NameError: Name 'test' is not defined"):
             parser.parse('test')
 
     def test_functions(self):
@@ -267,14 +287,11 @@ class Expression_Parser_Test(unittest.TestCase):
         self.assertEqual(self.parser.parse('square(2, y=3)'), 8)
 
         parser = expression.Expression_Parser(functions={'x2': lambda: 2})
-        with self.assertRaisesRegexp(SyntaxError,
-                                     "NameError: Function 'x1' is not defined"):
+        with self.assertRaisesError("NameError: Function 'x1' is not defined"):
             parser.parse('x1()')
 
-        with self.assertRaisesRegexp(SyntaxError,
-                                     r"TypeError: .* takes no arguments"):
+        with self.assertRaisesError(r"TypeError: .* takes (no|0.*) arguments"):
             parser.parse('x2(1,2,3)')
 
-        with self.assertRaisesRegexp(SyntaxError,
-                                     "Star arguments are not supported"):
+        with self.assertRaisesError("Star arguments are not supported"):
             parser.parse('x2(1, *data)')

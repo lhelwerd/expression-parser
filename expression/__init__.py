@@ -23,7 +23,7 @@ from __future__ import division
 import ast
 
 __all__ = ['Expression_Parser']
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 class Expression_Parser(ast.NodeVisitor):
     """
@@ -237,16 +237,32 @@ class Expression_Parser(ast.NodeVisitor):
         args = [self.visit(arg) for arg in node.args]
         keywords = dict([self.visit(keyword) for keyword in node.keywords])
 
-        if node.starargs is not None or node.kwargs is not None:
-            raise SyntaxError('Star arguments are not supported',
-                              ('', node.lineno, node.col_offset, ''))
+        # Python 2.7 starred arguments
+        if hasattr(node, 'starargs') and hasattr(node, 'kwargs'):
+            if node.starargs is not None or node.kwargs is not None:
+                raise SyntaxError('Star arguments are not supported',
+                                  ('', node.lineno, node.col_offset, ''))
 
         return func(*args, **keywords)
+
+    def visit_Starred(self, node):
+        """
+        Visit a starred function keyword argument node.
+        """
+
+        # pylint: disable=no-self-use
+
+        raise SyntaxError('Star arguments are not supported',
+                          ('', node.lineno, node.col_offset, ''))
 
     def visit_keyword(self, node):
         """
         Visit a function keyword argument node.
         """
+
+        if node.arg is None:
+            raise SyntaxError('Star arguments are not supported',
+                              ('', node.lineno, node.col_offset, ''))
 
         return (node.arg, self.visit(node.value))
 
