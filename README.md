@@ -1,5 +1,11 @@
 # Python sandboxed expression parser
 
+[![PyPI](https://img.shields.io/pypi/v/expression-parser.svg)](https://pypi.python.org/pypi/expression-parser)
+[![Build 
+Status](https://travis-ci.org/lhelwerd/expression-parser.svg?branch=master)](https://travis-ci.org/lhelwerd/expression-parser)
+[![Coverage 
+Status](https://coveralls.io/repos/github/lhelwerd/expression-parser/badge.svg?branch=master)](https://coveralls.io/github/lhelwerd/expression-parser?branch=master)
+
 This parser can calculate the results of a single simple expression,
 disallowing any complicated functions or control structures, with support for
 custom variable and function environment contexts.
