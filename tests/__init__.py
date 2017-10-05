@@ -260,6 +260,14 @@ class Expression_Parser_Test(unittest.TestCase):
 
         self.assertTrue(self.parser.parse('0 not in data'))
 
+    def test_ifelse(self):
+        """
+        Test the 'if..else' inline conditional expression.
+        """
+
+        self.assertEqual(self.parser.parse('0 if True else 1'), 0)
+        self.assertEqual(self.parser.parse('0.5 if 1 > 2 else 1.5'), 1.5)
+
     def test_variables(self):
         """
         Test whether known variables work and whether undefined variables raise
@@ -295,3 +303,18 @@ class Expression_Parser_Test(unittest.TestCase):
 
         with self.assertRaisesError("Star arguments are not supported"):
             parser.parse('x2(1, *data)')
+
+    def test_disallowed(self):
+        """
+        Test whether disallowed syntax, such as control structures, raise
+        exceptions.
+        """
+
+        with self.assertRaisesError("Node .* not allowed"):
+            self.parser.parse('while True: pass')
+
+        with self.assertRaisesError("Exactly one expression must be provided"):
+            self.parser.parse('')
+
+        with self.assertRaisesError("Exactly one expression must be provided"):
+            self.parser.parse('1;2')
