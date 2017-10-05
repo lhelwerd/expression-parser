@@ -18,10 +18,12 @@ limitations under the License.
 
 # pylint: disable=invalid-name
 
+# Use Python 3 division
+from __future__ import division
 import ast
 
 __all__ = ['Expression_Parser']
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 class Expression_Parser(ast.NodeVisitor):
     """
@@ -97,6 +99,14 @@ class Expression_Parser(ast.NodeVisitor):
         else:
             self._variables = variables
 
+        variable_names = set(self._variables.keys())
+        constant_names = set(self._variable_names.keys())
+        forbidden_variables = variable_names.intersection(constant_names)
+        if forbidden_variables:
+            keyword = 'keyword' if len(forbidden_variables) == 1 else 'keywords'
+            forbidden = ', '.join(forbidden_variables)
+            raise NameError('Cannot override {} {}'.format(keyword, forbidden))
+
         if functions is None:
             self._functions = {}
         else:
@@ -113,7 +123,7 @@ class Expression_Parser(ast.NodeVisitor):
             error.filename = filename
             error.text = expression
             raise error
-        except StandardError as error:
+        except Exception as error:
             error_type = error.__class__.__name__
             if len(error.args) > 2:
                 line_col = error.args[1:]
