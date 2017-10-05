@@ -18,16 +18,27 @@ custom variable and function environment contexts.
 - All other control structures and multiple expressions are disallowed
 - Isolation from execution context using a restricted scope
 - Separate scope for variables and functions to avoid abusing one or the other
+- Function calls may use keyword arguments
 - Errors from parsing or evaluating the expression are reported as 
   `SyntaxError` with appropriate context parameters to make error display 
   easier (works with default traceback output)
 - A successful parse yields the result of the evaluated expression, and 
   a separate property `used_variables` provides a set of variable names used in 
   the evaluation.
-- Supports both Python 2.7 and 3.6 AST syntax; note that the division operator 
-  `/` always returns floats instead of integers and that `True`, `False` and 
-  `None` are reserved named contants and cannot be overridden through the 
-  variable scope in both versions to keep compatibility.
+- Supports both Python 2.7 and 3.6 AST syntax tree
+- Python 3.6 are used whenever possible: Specifically, the division operator 
+  `/` always returns floats instead of integers, and `True`, `False` and `None` 
+  are reserved named constants and cannot be overridden through the variable 
+  scope in any version.
+
+Not supported (often by design):
+
+- Functions or lambdas defined within the expression
+- Control structures and other Python statements (`return`, `pass`, etc.)
+- Comprehensions and generators
+- Multiple expressions in the same input string
+- Function calls may not use variable positional or keyword arguments
+- Literals which are not integer, floats, or the named constants
 
 ## Requirements
 
@@ -103,4 +114,4 @@ print(parser.parse('int(log(e))'))
 
 ## License
 
-The API wrapper library is licensed under the Apache 2.0 License.
+The expression parser library is licensed under the Apache 2.0 License.
