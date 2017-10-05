@@ -9,7 +9,6 @@ release: pylint test clean tag build push upload
 
 .PHONY: setup
 setup:
-	pip install -r requirements.txt
 	pip install setuptools wheel
 
 .PHONY: get_version
