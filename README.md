@@ -13,23 +13,23 @@ custom variable and function environment contexts.
 ## Features
 
 - Support for all boolean, binary, unary, and comparative operators as in 
-  Python itself
-- Support for inline `if..else` expressions
-- All other control structures and multiple expressions are disallowed
-- Isolation from execution context using a restricted scope
-- Separate scope for variables and functions to avoid abusing one or the other
-- Function calls may use keyword arguments
-- Errors from parsing or evaluating the expression are reported as 
-  `SyntaxError` with appropriate context parameters to make error display 
-  easier (works with default traceback output)
+  Python itself.
+- Support for inline `if..else` expressions.
+- All other control structures and multiple expressions are disallowed.
+- Isolation from execution context using a restricted scope.
+- Separate scope for variables and functions to avoid abusing one or the other.
+- Function calls may use specific keyword arguments.
+- Errors from parsing or evaluating the expression are raised as `SyntaxError` 
+  with appropriate context parameters to make error display easier (works with 
+  default traceback output).
 - A successful parse yields the result of the evaluated expression, and 
   a separate property `used_variables` provides a set of variable names used in 
   the evaluation.
 - Supports both Python 2.7 and 3.6 AST syntax tree
-- Python 3.6 are used whenever possible: Specifically, the division operator 
-  `/` always returns floats instead of integers, and `True`, `False` and `None` 
-  are reserved named constants and cannot be overridden through the variable 
-  scope in any version.
+- Python 3+ conventions are used whenever possible: Specifically, the division 
+  operator `/` always returns floats instead of integers, and `True`, `False` 
+  and `None` are reserved named constants and cannot be overridden through the 
+  variable scope in any version.
 
 Not supported (often by design):
 
@@ -38,7 +38,7 @@ Not supported (often by design):
 - Comprehensions and generators
 - Multiple expressions in the same input string
 - Function calls may not use variable positional or keyword arguments
-- Literals which are not integer, floats, or the named constants
+- Literals which are not integers, floats, or the named constants
 
 ## Requirements
 
