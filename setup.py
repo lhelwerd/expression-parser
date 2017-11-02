@@ -33,7 +33,9 @@ custom variable and function environment contexts.''',
       url='https://github.com/lhelwerd/expression-parser',
       license='Apache License, Version 2.0',
       packages=find_packages(exclude=['tests*']),
-      scripts=[],
+      entry_points={
+          'console_scripts': ['expr = expression.interpreter:main']
+      },
       include_package_data=True,
       install_requires=[],
       test_suite='tests',
