@@ -34,7 +34,7 @@ custom variable and function environment contexts.''',
       license='Apache License, Version 2.0',
       packages=find_packages(exclude=['tests*']),
       entry_points={
-          'console_scripts': ['expr = expression.interpreter:main']
+          'console_scripts': ['expression = expression.interpreter:main']
       },
       include_package_data=True,
       install_requires=[],

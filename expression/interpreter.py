@@ -39,7 +39,7 @@ class Expression_Interpreter(cmd.Cmd):
         try:
             self.stdout.write(str(self.parser.parse(line)) + '\n')
         except SyntaxError:
-            traceback.print_exc()
+            traceback.print_exc(0)
 
     def do_quit(self, line):
         """
