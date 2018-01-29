@@ -2,7 +2,7 @@
 """
 Command line interpreter using the expression line parser.
 
-Copyright 2017 Leon Helwerda
+Copyright 2017-2018 Leon Helwerda
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -33,11 +33,17 @@ class Expression_Interpreter(cmd.Cmd):
     def __init__(self):
         cmd.Cmd.__init__(self)
         self.prompt = '>> '
-        self.parser = expression.Expression_Parser()
+        self.parser = expression.Expression_Parser(assignment=True)
 
     def default(self, line):
         try:
-            self.stdout.write(str(self.parser.parse(line)) + '\n')
+            output = self.parser.parse(line)
+            if output is not None:
+                self.stdout.write(str(output) + '\n')
+
+            variables = self.parser.variables
+            variables.update(self.parser.modified_variables)
+            self.parser.variables = variables
         except SyntaxError:
             traceback.print_exc(0)
 

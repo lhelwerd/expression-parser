@@ -1,7 +1,7 @@
 """
 Package for the expression parser.
 
-Copyright 2017 Leon Helwerda
+Copyright 2017-2018 Leon Helwerda
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,4 +19,4 @@ limitations under the License.
 from .parser import Expression_Parser
 
 __all__ = ['Expression_Parser']
-__version__ = '0.0.4'
+__version__ = '0.0.5'

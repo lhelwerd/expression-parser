@@ -15,6 +15,8 @@ custom variable and function environment contexts.
 - Support for all boolean, binary, unary, and comparative operators as in 
   Python itself.
 - Support for inline `if..else` expressions.
+- Support for assignments and augmented assignments like `+=`, only if enabled 
+  explicitly.
 - All other control structures and multiple expressions are disallowed.
 - Isolation from execution context using a restricted scope.
 - Separate scope for variables and functions to avoid abusing one or the other.
@@ -22,10 +24,11 @@ custom variable and function environment contexts.
 - Errors from parsing or evaluating the expression are raised as `SyntaxError` 
   with appropriate context parameters to make error display easier (works with 
   default traceback output).
-- A successful parse yields the result of the evaluated expression, and 
-  a separate property `used_variables` provides a set of variable names used in 
-  the evaluation.
-- Supports both Python 2.7 and 3.6 AST syntax tree
+- A successful parse yields the result of the evaluated expression. Successful
+  assignments of variables are stored in a property `modified_variables`.
+  A separate property `used_variables` provides a set of variable names used in 
+  the evaluation of the expression excluding the assignment targets.
+- Supports both Python 2.7 and 3.6 AST syntax trees.
 - Python 3+ conventions are used whenever possible: Specifically, the division 
   operator `/` always returns floats instead of integers, and `True`, `False` 
   and `None` are reserved named constants and cannot be overridden through the 
@@ -33,12 +36,14 @@ custom variable and function environment contexts.
 
 Not supported (often by design):
 
-- Functions or lambdas defined within the expression
-- Control structures and other Python statements (`return`, `pass`, etc.)
-- Comprehensions and generators
-- Multiple expressions in the same input string
-- Function calls may not use variable positional or keyword arguments
-- Literals which are not integers, floats, or the named constants
+- Functions or lambdas defined within the expression.
+- Control structures and other Python statements (`return`, `pass`, etc.).
+- Comprehensions and generators.
+- Multiple expressions or assignment targets in the same input string.
+- Function calls that have variable positional or keyword (starred) arguments.
+- Literals which are not integers, floats, or the named constants, nor any
+  subscripting or indexing. You can still inject other types of variables using 
+  the context, and add specialized functions to interact with them.
 
 ## Requirements
 
@@ -84,11 +89,16 @@ functions = {
 
 Then create the parser, either by simply calling it with no additional 
 arguments, such as `parser = expression.Expression_Parser()`, or by passing the 
-scope along to it:
+scope along to it in dictionaries of values and functions, respectively:
 
 ```python
-parser = expression.Expression_Parser(variables=variables, functions=functions)
+parser = expression.Expression_Parser(variables=variables, functions=functions,
+                                      assignment=bool(assignment))
 ```
+
+You can also set a new dictionary for `variables`, and enable or disable 
+parsing of assignments in the expression using `assignment`, after construction 
+via the properties of the created object.
 
 Now you can use this parser to evaluate any valid expression:
 

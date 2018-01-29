@@ -268,7 +268,7 @@ class Expression_Parser_Test(unittest.TestCase):
         self.assertEqual(self.parser.parse('0 if True else 1'), 0)
         self.assertEqual(self.parser.parse('0.5 if 1 > 2 else 1.5'), 1.5)
 
-    def test_variables(self):
+    def test_known_variables(self):
         """
         Test whether known variables work and whether undefined variables raise
         exceptions.
@@ -310,7 +310,7 @@ class Expression_Parser_Test(unittest.TestCase):
         exceptions.
         """
 
-        with self.assertRaisesError("Node .* not allowed"):
+        with self.assertRaisesError(r"Node .* not allowed"):
             self.parser.parse('while True: pass')
 
         with self.assertRaisesError("Exactly one expression must be provided"):
@@ -318,6 +318,47 @@ class Expression_Parser_Test(unittest.TestCase):
 
         with self.assertRaisesError("Exactly one expression must be provided"):
             self.parser.parse('1;2')
+
+    def test_variables(self):
+        """
+        Test variable property.
+        """
+
+        self.assertEqual(self.parser.variables, {'data': [1, 2, 3]})
+        self.parser.variables = {'x': 42, 'y': 1.3}
+        self.assertEqual(self.parser.variables, {'x': 42, 'y': 1.3})
+
+    def test_assignment(self):
+        """
+        Test assignment property and parsing.
+        """
+
+        # Default assignment state is False.
+        self.assertFalse(self.parser.assignment)
+        with self.assertRaisesError("Assignments are not allowed"):
+            self.parser.parse("a = 1")
+        with self.assertRaisesError("Assignments are not allowed"):
+            self.parser.parse("foo += 1")
+
+        self.parser.assignment = True
+        with self.assertRaisesError(r"Multiple-target .* not supported"):
+            self.parser.parse("a = b = 3")
+        with self.assertRaisesError(r"Assignment target must be a variable .*"):
+            self.parser.parse("a,b = 2")
+        with self.assertRaisesError(r"Assignment target must be a variable .*"):
+            self.parser.parse("data[1] *= 2")
+        with self.assertRaisesError(r"Assignment name .* is not defined"):
+            self.parser.parse("test /= 123")
+
+        self.assertTrue(self.parser.assignment)
+        self.parser.parse("a = 1")
+        self.assertEqual(self.parser.modified_variables, {'a': 1})
+        self.assertEqual(self.parser.used_variables, set())
+
+        self.parser.variables = {'b': 1}
+        self.parser.parse("b += 5")
+        self.assertEqual(self.parser.modified_variables, {'b': 6})
+        self.assertEqual(self.parser.used_variables, set())
 
     def test_used_variables(self):
         """

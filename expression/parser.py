@@ -1,7 +1,7 @@
 """
 Sandboxed expression parser.
 
-Copyright 2017 Leon Helwerda
+Copyright 2017-2018 Leon Helwerda
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -88,26 +88,20 @@ class Expression_Parser(ast.NodeVisitor):
         'bool': bool
     }
 
-    def __init__(self, variables=None, functions=None):
-        if variables is None:
-            self._variables = {}
-        else:
-            self._variables = variables
-
-        variable_names = set(self._variables.keys())
-        constant_names = set(self._variable_names.keys())
-        forbidden_variables = variable_names.intersection(constant_names)
-        if forbidden_variables:
-            keyword = 'keyword' if len(forbidden_variables) == 1 else 'keywords'
-            forbidden = ', '.join(forbidden_variables)
-            raise NameError('Cannot override {} {}'.format(keyword, forbidden))
+    def __init__(self, variables=None, functions=None, assignment=False):
+        self._variables = None
+        self.variables = variables
 
         if functions is None:
             self._functions = {}
         else:
             self._functions = functions
 
+        self._assignment = False
+        self.assignment = assignment
+
         self._used_variables = set()
+        self._modified_variables = {}
 
     def parse(self, expression, filename='<expression>'):
         """
@@ -115,6 +109,7 @@ class Expression_Parser(ast.NodeVisitor):
         """
 
         self._used_variables = set()
+        self._modified_variables = {}
 
         try:
             return self.visit(ast.parse(expression))
@@ -134,6 +129,56 @@ class Expression_Parser(ast.NodeVisitor):
             raise error
 
     @property
+    def variables(self):
+        """
+        Retrieve the variables that exist in the scope of the parser.
+
+        This property returns a copy of the dictionary.
+        """
+
+        return self._variables.copy()
+
+    @variables.setter
+    def variables(self, variables):
+        """
+        Set a new variable scope for the expression parser.
+
+        If built-in keyword names `True`, `False` or `None` are used, then
+        this property raises a `NameError`.
+        """
+
+        if variables is None:
+            variables = {}
+        else:
+            variables = variables.copy()
+
+        variable_names = set(variables.keys())
+        constant_names = set(self._variable_names.keys())
+        forbidden_variables = variable_names.intersection(constant_names)
+        if forbidden_variables:
+            keyword = 'keyword' if len(forbidden_variables) == 1 else 'keywords'
+            forbidden = ', '.join(forbidden_variables)
+            raise NameError('Cannot override {} {}'.format(keyword, forbidden))
+
+        self._variables = variables
+
+    @property
+    def assignment(self):
+        """
+        Retrieve whether assignments are accepted by the parser.
+        """
+
+        return self._assignment
+
+    @assignment.setter
+    def assignment(self, value):
+        """
+        Enable or disable parsing assignments.
+        """
+
+        self._assignment = bool(value)
+
+    @property
     def used_variables(self):
         """
         Retrieve the names of the variables that were evaluated in the most
@@ -142,6 +187,22 @@ class Expression_Parser(ast.NodeVisitor):
         """
 
         return self._used_variables
+
+    @property
+    def modified_variables(self):
+        """
+        Retrieve the variables that were set or modified in the most recent call
+        to `parse`. Since only one expression is allowed, this dictionary
+        contains at most one element. An augmented expression such as `+=` is
+        used, then the variable is only in this dictionary if the variable
+        is in the scope. If `parse` failed with any other exception, then
+        this dictionary may be incomplete. If the expression parser is set to
+        disallow assignments, then the dictionary is always empty.
+
+        This property returns a copy of the dictionary.
+        """
+
+        return self._modified_variables.copy()
 
     def generic_visit(self, node):
         """
@@ -253,6 +314,48 @@ class Expression_Parser(ast.NodeVisitor):
                                   ('', node.lineno, node.col_offset, ''))
 
         return func(*args, **keywords)
+
+    def visit_Assign(self, node):
+        """
+        Visit an assignment node.
+        """
+
+        if not self.assignment:
+            raise SyntaxError('Assignments are not allowed in this expression',
+                              ('', node.lineno, node.col_offset, ''))
+
+        if len(node.targets) != 1:
+            raise SyntaxError('Multiple-target assignments are not supported',
+                              ('', node.lineno, node.col_offset, ''))
+        if not isinstance(node.targets[0], ast.Name):
+            raise SyntaxError('Assignment target must be a variable name',
+                              ('', node.lineno, node.col_offset, ''))
+
+        name = node.targets[0].id
+        self._modified_variables[name] = self.visit(node.value)
+
+    def visit_AugAssign(self, node):
+        """
+        Visit an augmented assignment node.
+        """
+
+        if not self.assignment:
+            raise SyntaxError('Assignments are not allowed in this expression',
+                              ('', node.lineno, node.col_offset, ''))
+
+        if not isinstance(node.target, ast.Name):
+            raise SyntaxError('Assignment target must be a variable name',
+                              ('', node.lineno, node.col_offset, ''))
+
+        name = node.target.id
+        if name not in self._variables:
+            raise NameError("Assignment name '{}' is not defined".format(name),
+                            node.lineno, node.col_offset)
+
+        op = type(node.op)
+        func = self._binary_ops[op]
+        self._modified_variables[name] = func(self._variables[name],
+                                              self.visit(node.value))
 
     def visit_Starred(self, node):
         """
