@@ -1,0 +1,51 @@
+name: Lint
+
+on:
+  push:
+    branches: [ "master", "dev" ]
+  pull_request:
+    branches: [ "master", "dev" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ruff:
+    name: Ruff (Python 3.14)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Ruff check
+        id: ruff-check
+        uses: astral-sh/ruff-action@v3
+        continue-on-error: true
+        with:
+          args: check expression tests
+
+      - name: Ruff import order
+        id: ruff-imports
+        uses: astral-sh/ruff-action@v3
+        continue-on-error: true
+        with:
+          args: check expression tests --select I
+
+      - name: Ruff format check
+        id: ruff-format
+        uses: astral-sh/ruff-action@v3
+        continue-on-error: true
+        with:
+          args: format --check
+
+      - name: Summary
+        run: |
+          echo "ruff check   : ${{ steps.ruff-check.outcome }}"
+          echo "imports      : ${{ steps.ruff-imports.outcome }}"
+          echo "format       : ${{ steps.ruff-format.outcome }}"
