@@ -7,6 +7,8 @@ and we adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.0.6] - 2025-10-11
+
 ### Changed
 
 - Implement true short-circuit for 'and'/'or' returning deciding operand
@@ -53,7 +55,8 @@ and we adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Initial version of expression parser
 
-[Unreleased]: https://github.com/lhelwerd/expression-parser/compare/v0.0.5...HEAD
+[Unreleased]: https://github.com/lhelwerd/expression-parser/compare/v0.0.6...HEAD
+[0.0.6]: https://github.com/lhelwerd/expression-parser/releases/tag/v0.0.6
 [0.0.5]: https://github.com/lhelwerd/expression-parser/releases/tag/v0.0.5
 [0.0.4]: https://github.com/lhelwerd/expression-parser/releases/tag/v0.0.4
 [0.0.3]: https://github.com/lhelwerd/expression-parser/releases/tag/v0.0.3

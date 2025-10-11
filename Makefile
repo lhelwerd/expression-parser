@@ -6,7 +6,7 @@ TEST=-m unittest discover -s tests -p '*.py'
 all: release
 
 .PHONY: release
-release: pylint test clean tag build push upload
+release: ruff coverage clean tag build push upload
 
 .PHONY: setup
 setup:
