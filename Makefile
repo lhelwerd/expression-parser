@@ -1,3 +1,4 @@
+SOURCES=*.py expression/*.py tests/*.py
 COVERAGE=coverage
 TEST=-m unittest discover -s tests -p '*.py'
 
@@ -18,7 +19,11 @@ get_version:
 
 .PHONY: pylint
 pylint:
-	pylint *.py expression/*.py tests/*.py
+	pylint $(SOURCES)
+
+.PHONY: ruff
+ruff:
+	ruff check $(SOURCES)
 
 .PHONY: tag
 tag: get_version
@@ -45,6 +50,7 @@ test:
 coverage:
 	$(COVERAGE) run $(TEST)
 	$(COVERAGE) report -m
+	$(COVERAGE) xml -i -o coverage.xml
 
 .PHONY: clean
 clean:

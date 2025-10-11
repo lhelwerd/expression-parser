@@ -48,7 +48,18 @@ jobs:
 
       - name: Run tests (unittest)
         run: |
-          python -m unittest discover -v
+          pip install coverage
+          make coverage
+
+      - name: Coveralls upload
+        uses: coverallsapp/github-action@v2
+        if: "${{ success() }}"
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          flag-name: "python-${{ matrix.python }}"
+          parallel: true
+          format: cobertura
+          files: coverage.xml
 
   test-legacy:
     name: Tests (Python 2.7 via container)
@@ -77,3 +88,10 @@ jobs:
       - name: Aggregate result
         run: |
           echo "Modern matrix + legacy (2.7) complete. Check job logs for details."
+
+      - name: Close parallel Coveralls build
+        uses: coverallsapp/github-action@v2
+        if: "${{ success() }}"
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          parallel-finished: true

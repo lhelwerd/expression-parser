@@ -404,8 +404,6 @@ class Expression_Parser(ast.NodeVisitor):
         Visit a starred function keyword argument node.
         """
 
-        # pylint: disable=no-self-use
-
         raise SyntaxError(
             "Star arguments are not supported", ("", node.lineno, node.col_offset, "")
         )
@@ -429,7 +427,6 @@ class Expression_Parser(ast.NodeVisitor):
         Visit a literal number node.
         """
 
-        # pylint: disable=no-self-use
         return node.n
 
     def visit_Name(self, node):
@@ -453,10 +450,8 @@ class Expression_Parser(ast.NodeVisitor):
         Visit a named constant singleton node (Python 3).
         """
 
-        # pylint: disable=no-self-use
         return node.value
 
     def visit_Constant(self, node):  # Python 3.8+ unified literal node
         """Visit a constant literal node (numbers, strings, booleans, None, Ellipsis)."""
-        # pylint: disable=no-self-use
         return node.value
